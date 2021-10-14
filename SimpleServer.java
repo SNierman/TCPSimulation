@@ -1,6 +1,7 @@
 package SN;
 
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Random;
 import java.io.*;
 
@@ -22,24 +23,24 @@ public class SimpleServer {
 		int portNumber = Integer.parseInt(args[0]);
 
 		try (ServerSocket serverSocket = new ServerSocket(Integer.parseInt(args[0]));
-				Socket clientSocket1 = serverSocket.accept();
-				Socket clientSocket2 = serverSocket.accept();
-				PrintWriter responseWriter1 = new PrintWriter(clientSocket1.getOutputStream(), true);
-				BufferedReader requestReader1 = new BufferedReader(new InputStreamReader(clientSocket1.getInputStream()));
-				PrintWriter responseWriter2 = new PrintWriter(clientSocket2.getOutputStream(), true);
-				BufferedReader requestReader2 = new BufferedReader(new InputStreamReader(clientSocket2.getInputStream()));
+				Socket clientSocket = serverSocket.accept();
+				// os sends out objects to client
+		        ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
+				//PrintWriter responseWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+				BufferedReader requestReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 				) {
-			String usersRequest;
-			while ((usersRequest = requestReader1.readLine()) != null) {
-				System.out.println("\"" + usersRequest + "\" received");
-				String response = magicEightBall.getNextAnswer();
-				System.out.println("Responding: \"" + response + "\"");
-				responseWriter1.println(response);
-				usersRequest = requestReader2.readLine();
-				System.out.println("\"" + usersRequest + "\" received");
-				response = magicEightBall.getNextAnswer();
-				System.out.println("Responding: \"" + response + "\"");
-				responseWriter2.println(response);
+			ArrayList<Packet> dataList = new ArrayList<>();
+			createList(dataList);
+			
+			String requestMissing;
+			while ((requestMissing = requestReader.readLine()) != null) {
+				// send list of packets to client
+				os.writeObject(dataList);
+				os.flush();
+				System.out.println("\"" + requestMissing + "\" received");
+				//String response = magicEightBall.getNextAnswer();
+				//System.out.println("Responding: \"" + response + "\"");
+				//responseWriter.println(response);
 			}
 		} catch (IOException e) {
 			System.out.println(
@@ -47,6 +48,12 @@ public class SimpleServer {
 			System.out.println(e.getMessage());
 		}
 
+	}
+	
+	public static void createList(ArrayList<Packet> dataList) {
+		for (int i = 0; i < 20; i++) {
+			dataList.add(new Packet(i));
+		}
 	}
 
 }

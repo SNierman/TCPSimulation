@@ -2,6 +2,7 @@ package SN;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
 public class SimpleClient {
     public static void main(String[] args) throws IOException {
@@ -22,16 +23,19 @@ public class SimpleClient {
             Socket clientSocket = new Socket(hostName, portNumber);
             PrintWriter requestWriter = // stream to write text requests to server
                 new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader responseReader= // stream to read text response from server
-                new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream())); 
-            BufferedReader stdIn = // standard input stream to get user's requests
-                new BufferedReader(
-                    new InputStreamReader(System.in))
+            //BufferedReader responseReader= // stream to read text response from server
+            //    new BufferedReader(
+            //        new InputStreamReader(clientSocket.getInputStream())); 
+        	ObjectInputStream is = new ObjectInputStream(clientSocket.getInputStream());
+            //BufferedReader stdIn = // standard input stream to get user's requests
+            //    new BufferedReader(
+            //        new InputStreamReader(System.in))
         ) {
-            String userInput;
+            //String userInput;
 			String serverResponse;
-            while ((userInput = stdIn.readLine()) != null) {
+			String clientDone;
+            while (clientDone != "Finished") {
+            	ArrayList<Packet> received = (ArrayList<Packet>)is.readObject();
                 requestWriter.println(userInput); // send request to server
 				serverResponse = responseReader.readLine();
                 System.out.println("SERVER RESPONDS: \"" + serverResponse + "\"");
